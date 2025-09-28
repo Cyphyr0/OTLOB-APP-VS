@@ -3,6 +3,11 @@ version: 1.0.0+1
 description: A definitive light & soft food delivery UI Kit for Otlob.
 environment:
   sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.0.0"
+platforms:
+  android: true
+  ios: true
+  web: true
 dependencies:
   flutter:
     sdk: flutter
