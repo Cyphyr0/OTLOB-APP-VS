@@ -19,7 +19,7 @@ final sl = GetIt.instance;
 void init() {
   // External
   sl.registerLazySingleton(() => Dio());
-  sl.registerLazySingleton(() => GoogleSignIn());
+  sl.registerLazySingleton(() => GoogleSignIn(scopes: ['email']));
 
   // Register data sources first
   sl.registerLazySingleton<AuthRemoteDataSource>(

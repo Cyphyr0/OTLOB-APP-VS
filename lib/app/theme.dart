@@ -55,7 +55,7 @@ class AppTheme {
       primary: Color(0xFF0D1B2A),
       secondary: Color(0xFFE07A5F),
       surface: Color(0xFFF8F9FA),
-      background: Colors.white,
+      surfaceContainer: Color(0xFFF8F9FA),
       error: Color(0xFFFF4136),
       tertiary: Color(0xFF3D9970), // Success
       inversePrimary: Color(0xFFFFDC00), // Warning

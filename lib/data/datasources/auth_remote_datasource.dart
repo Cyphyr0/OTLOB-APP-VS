@@ -1,26 +1,35 @@
 import 'package:dio/dio.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+/// Interface for authentication operations
 abstract class AuthRemoteDataSource {
+  /// Sign up a new user with email and password
   Future<void> signUp({
     required String name,
     required String email,
     required String password,
   });
 
+  /// Log in an existing user with email and password
   Future<void> login({
     required String email,
     required String password,
   });
 
-  Future<void> googleSignIn();
+  /// Sign in user with Google account
+  Future<void> signInWithGoogle();
 }
 
+/// Implementation of the authentication data source
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final Dio dio;
-  final GoogleSignIn googleSignIn;
+  final Dio _dio;
+  final GoogleSignIn _googleSignInClient;
 
-  AuthRemoteDataSourceImpl({required this.dio, required this.googleSignIn});
+  AuthRemoteDataSourceImpl({
+    required Dio dio,
+    required GoogleSignIn googleSignIn,
+  })  : _dio = dio,
+       _googleSignInClient = googleSignIn;
 
   @override
   Future<void> signUp({
@@ -29,11 +38,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     try {
-      // This is a mock implementation.
-      await Future.delayed(const Duration(seconds: 2));
-      print('Signing up with name: $name, email: $email');
-    } on DioError catch (e) {
-      throw Exception(e.message);
+      await _dio.post('/auth/signup', data: {
+        'name': name,
+        'email': email,
+        'password': password,
+      });
+    } on DioException catch (e) {
+      throw Exception(e.message ?? 'Failed to sign up');
     }
   }
 
@@ -43,28 +54,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     try {
-      // This is a mock implementation.
-      await Future.delayed(const Duration(seconds: 2));
-      print('Logging in with email: $email');
-    } on DioError catch (e) {
-      throw Exception(e.message);
+      await _dio.post('/auth/login', data: {
+        'email': email,
+        'password': password,
+      });
+    } on DioException catch (e) {
+      throw Exception(e.message ?? 'Failed to log in');
     }
   }
 
   @override
-  Future<void> googleSignIn() async {
+  Future<void> signInWithGoogle() async {
     try {
-      final googleUser = await googleSignIn.signIn();
+      final googleUser = await _googleSignInClient.signIn();
       if (googleUser == null) {
-        // The user canceled the sign-in
-        return;
+        throw Exception('Google sign-in was cancelled');
       }
+      
       final googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
-      // TODO: Send the idToken to your backend to verify and create a session.
-      print('Google Sign-In successful, token: $idToken');
+      
+      await _dio.post('/auth/google', data: {
+        'idToken': googleAuth.idToken,
+        'accessToken': googleAuth.accessToken,
+      });
+    } on DioException catch (e) {
+      throw Exception(e.message ?? 'Failed to authenticate with server');
     } catch (e) {
-      throw Exception(e.toString());
+      throw Exception('Authentication failed: ${e.toString()}');
     }
   }
 }
